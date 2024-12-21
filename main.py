@@ -75,7 +75,7 @@ class ChineseNER(object):
     def load_config(self):
         self.embedding_size = 100
         self.hidden_size = 128
-        self.batch_size = 12
+        self.batch_size = 16
         # Network Model File Path
         self.model_path = 'models/'
         #All named entities label
@@ -118,6 +118,10 @@ class ChineseNER(object):
         epsilon = 1e-8
         optimizer = optim.Adam(self.model.parameters(), lr=initial_learning_rate, betas=(beta1, beta2), eps=epsilon)
         results_file = "results{}.txt".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+        early_stopping_patience = 15  # Consecutive epochs to check for early stopping
+        min_delta = 0.001  # Minimum improvement in validation accuracy
+        best_val_acc = 0  # Best validation accuracy so far
+        patience_counter = 0  # Counter for early stopping
         for epoch in range(10):
             index = 0
             baocun_acc = []
@@ -157,6 +161,17 @@ class ChineseNER(object):
                 f.write("第{}个epoach训练集损失".format(epoch) + str(epoach_loss) + '\r')
                 f.write("Validation dataset correctness (验证集正确率):" + str(epoach_acc) + '\r')
                 f.write(' ' + '\r')
+
+            # Early stopping check
+            if epoach_acc > best_val_acc + min_delta:
+                best_val_acc = epoach_acc
+                patience_counter = 0
+            else:
+                patience_counter += 1
+
+            if patience_counter >= early_stopping_patience:
+                print(f"Early stopping triggered at epoch {epoch}")
+                break
 
 
     def evaluate(self):
@@ -342,25 +357,3 @@ if __name__ == "__main__":
 
     cn = ChineseNER("train")
     cn.train()
-    # pre='A桥桥面铺装层良好；伸缩缝存在被砂石堵塞、防水橡胶条破损渗水等病害；护栏混凝土底座局部开裂。桥面系技术状况评定得分为92.75分。A桥上部结构技术状况良好，未发现混凝土破损、剥落、露筋等病害。技术状况评定得分为100.00分。
-    # 桥台有渗水痕迹；部分支座有不均匀压缩变形。下部结构技术状况得分为97.49分。A桥技术状况得分为97.78分，根据桥梁完好状况评估标准，A桥为A级。'
-    # cn = ChineseNER("predict")
-    # org_sentences, pre_result = cn.predict(input_str=pre)
-    # bn = pre_find_fun(pre, pre_result, '-BN')
-    # dl = pre_find_fun(pre, pre_result, '-DL')
-    # dis = pre_find_fun(pre, pre_result, '-DIS')
-    # ndis,loc_ndis = pre_find_fun(pre, pre_result, '-NDIS')
-    # ei = pre_find_fun(pre, pre_result, '-EI')
-    # sc = pre_find_fun(pre, pre_result, '-SC')
-    # ra = pre_find_fun(pre, pre_result, '-RA')
-    # st = pre_find_fun(pre, pre_result, '-ST')
-    # ma = pre_find_fun(pre, pre_result, '-MA')
-    # print('bridge name entity (桥梁名称):', bn)
-    # print('defect location entity (病害位置):', dl)
-    # print('defect entity (病害):', dis)
-    # print('no defect entity (无病害):', ndis)
-    # print('defect indicator entity (评价指标):', ei)
-    # print('score entity (技术状况得分):', sc)
-    # print('rank entity (技术状况等级):', ra)
-    # print('standardise entity (规范):', st)
-    # print('Maintenance entity (维修措施):', ma)
