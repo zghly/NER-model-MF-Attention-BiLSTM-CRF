@@ -22,10 +22,10 @@ A Novel Named Entity Recognition Model for Bridge Inspection Report with Multi-F
  
 # Direction for use
 
-    1. Run **data_aug.py** to creat training set, validation set, and test set. Data augmentation will be performed on the training set in **data_aug.py** and the number of augmentations is optional.
+1. Run **data_aug.py** to creat training set, validation set, and test set. Data augmentation will be performed on the training set in **data_aug.py** and the number of augmentations is optional.
     
-    2. Run **main.py** to train the MF-Attention-BiLSTM-CRF model.
+2. Run **main.py** to train the MF-Attention-BiLSTM-CRF model.
     
-    3.实现指定版本的include、src、lib文件的拷贝
+3. Run **optimization_results_evaluation.py** to verified the model performanceon on test set after the model training. The correction results will print togther.
  
  
