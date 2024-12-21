@@ -17,10 +17,16 @@ A Novel Named Entity Recognition Model for Bridge Inspection Report with Multi-F
     ├── optimization_results_evaluation.py    //  To verified the model performanceon on test set after the model training. The correction results will print togther.
             
     ├── main.py    //  Model training.
+
+    ├── data
     
-    │   ├── substructure     
+    │   ├── substructure     // Location of files such as training sets
+        
+    ├── models     // NER model file
     
-    │       ├── data  // Location of files such as training sets
+    ├── clf_model     // Entity classifier model file
+
+    ├── small     // LTP configuration File
  
 # Direction for use
 
