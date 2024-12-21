@@ -3,6 +3,8 @@ A Novel Named Entity Recognition Model for Bridge Inspection Report with Multi-F
  
 # Python environment
 
+ python == 3.6
+
  pytorch == 2.2.1
 
  ltp == 4.2.14
@@ -30,6 +32,4 @@ A Novel Named Entity Recognition Model for Bridge Inspection Report with Multi-F
     
 4. Run **optimization_results_evaluation.py** to verified the model performanceon on test set after the model training. The correction results will print togther.
 
-4.Note: When changing the dataset, my_dict.pickle and the classifier file need to be deleted to train the new classifier for recognition result correction.
- 
- 
+5. Note: When changing the dataset, my_dict.pickle and the classifier file need to be deleted to train the new classifier for recognition result correction.
