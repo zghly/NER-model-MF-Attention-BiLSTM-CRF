@@ -21,6 +21,7 @@ from joblib import dump, load
 from ltp import LTP
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+import os
 
 # 初始化LTP模型
 ltp= LTP('./small')
@@ -238,19 +239,23 @@ def phrase_encoding(input_str):
     svn_bianma = [item for sublist in svn_bianma for item in sublist]
     return svn_bianma
 
-# 创建字典将训练集实体编码结果保存到字典文件my_dict.pickle中
-my_dict = {}
-# texts_encoding=[]
-for i in range(len(texts)):
-# for i in range(10):
-    print(i,'/',len(texts))
-    # print(len(phrase_encoding(texts[i])))
-    # texts_encoding.append(phrase_encoding(texts[i]))
-    my_dict[texts[i]] = np.array(phrase_encoding(texts[i]))
-# print(my_dict)
-# 写入pickle文件
-with open('my_dict.pickle', 'wb') as pickle_file:
-    pickle.dump(my_dict, pickle_file)
+
+if os.path.exists('my_dict.pickle'):
+    pass
+else:
+    # 创建字典将训练集实体编码结果保存到字典文件my_dict.pickle中
+    my_dict = {}
+    # texts_encoding=[]
+    for i in range(len(texts)):
+    # for i in range(10):
+        print(i,'/',len(texts))
+        # print(len(phrase_encoding(texts[i])))
+        # texts_encoding.append(phrase_encoding(texts[i]))
+        my_dict[texts[i]] = np.array(phrase_encoding(texts[i]))
+    # print(my_dict)
+    # 写入pickle文件
+    with open('my_dict.pickle', 'wb') as pickle_file:
+        pickle.dump(my_dict, pickle_file)
 
 with open('my_dict.pickle', 'rb') as pickle_file:
     loaded_dict = pickle.load(pickle_file)
@@ -266,6 +271,54 @@ X_reduced = pca.fit_transform(texts_encoding)
 
 print('Divide the entity classifier training set and test set')
 X_train, X_test, y_train, y_test = train_test_split(X_reduced, labels, test_size=0.3, random_state=42)
+
+if os.path.exists('./clf_model/svm_voting.joblib'):
+    pass
+else:
+    print("创建并训练KNN分类器")
+    knn_clf = KNeighborsClassifier(n_neighbors=5)
+    knn_clf.fit(X_train, y_train)
+    knn_pred = knn_clf.predict(X_test)
+    print("保存KNN模型到文件")
+    dump(knn_clf, './clf_model/knn_voting.joblib')  # 保存模型的文件名
+    print("KNN模型已保存。")
+
+    print("创建并训练随机森林分类器")
+    rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_clf.fit(X_train, y_train)
+    rf_pred = rf_clf.predict(X_test)
+    print("保存随机森林模型到文件")
+    dump(rf_clf, './clf_model/rf_voting.joblib')  # 保存模型的文件名
+    print("随机森林模型已保存。")
+
+
+    print("创建并训练SVM分类器")
+    svm_clf = SVC(kernel='linear', C=1, probability=True)
+    svm_clf.fit(X_train, y_train)
+    svm_pred = svm_clf.predict(X_test)
+    print("保存SVM模型到文件")
+    dump(svm_clf, './clf_model/svm_voting.joblib')  # 这里的'svm_model.joblib'是保存模型的文件名
+    print("模型已保存。")
+
+    print('创建并训练梯度提升树分类器')
+    # gbt_clf = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=42)
+    gbt_clf = GradientBoostingClassifier()
+    gbt_clf.fit(X_train, y_train)
+    gbt_pred = gbt_clf.predict(X_test)
+    print("保存GBT模型到文件")
+    dump(gbt_clf, './clf_model/gbt_voting.joblib')  # 这里的'svm_model.joblib'是保存模型的文件名
+    print("模型已保存。")
+
+    print("计算四种分类器的准确率")
+    knn_accuracy = accuracy_score(y_test, knn_pred)
+    rf_accuracy = accuracy_score(y_test, rf_pred)
+    svm_accuracy = accuracy_score(y_test, svm_pred)
+    gbt_accuracy = accuracy_score(y_test, gbt_pred)
+    print(f"KNN准确率: {knn_accuracy}")
+    print(f"随机森林准确率: {rf_accuracy}")
+    print(f"SVM准确率: {svm_accuracy}")
+    print(f"GBT准确率: {gbt_accuracy}")
+
 
 # loaded models to calculate accuracy
 loaded_svm = load('./clf_model/svm_voting.joblib')
